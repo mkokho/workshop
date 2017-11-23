@@ -1,0 +1,4 @@
+* text=auto
+
+# scripts need to end with LF
+*.sh ext eol=lf
