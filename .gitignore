@@ -1,3 +1,9 @@
 #IntelliJ Idea
 .idea
 .iml
+
+# Build files
+.gradle
+build
+docker/*.jar
+docker/etc

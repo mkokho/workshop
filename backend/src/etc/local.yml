@@ -1,0 +1,11 @@
+server:
+  applicationConnectors:
+  - type: http
+    port: 8080
+
+logging:
+  level: INFO
+  appenders:
+    - type: console
+      logFormat: "%p [%t] %c{1} - %m%n"
+

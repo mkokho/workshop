@@ -1,0 +1,61 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.4'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.1.60"
+    }
+}
+
+
+plugins {
+    id "org.jetbrains.kotlin.jvm" version "1.1.60"
+}
+
+apply plugin: "application"
+mainClassName = "nz.co.airnz.docker.Main"
+applicationName = "Dropwizard in Docker"
+
+// Dropwizard expects argument `server` and path to configuration file to start up
+run {
+    args = ["server", "src/etc/local.yml"]
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile "io.swagger:swagger-annotations:1.5.10"
+    compile "io.swagger:swagger-jersey2-jaxrs:1.5.10"
+    compile "io.dropwizard:dropwizard-core:1.2.0"
+    compile "org.jetbrains.kotlin:kotlin-stdlib"
+
+    testCompile 'junit:junit:4.12'
+    testCompile 'org.assertj:assertj-core:3.8.0'
+    testCompile 'org.mockito:mockito-core:2.12.0'
+}
+
+apply plugin: 'com.github.johnrengelman.shadow'
+shadowJar {
+    archiveName = "app.jar"
+    mergeServiceFiles()
+    mergeServiceFiles { path = 'META-INF/cxf' }
+}
+
+// collect all files required by our docker image in one folder
+task preDockerBuild(dependsOn: 'shadowJar') {
+    doLast {
+        copy {
+            from "build/libs/" + shadowJar.archiveName
+            into "docker"
+        }
+        copy {
+            from "src/etc"
+            into "docker/etc"
+        }
+        println "all required files has been moved into `docker` folder"
+        println "now you can build image, run `docker build --tag=sample ./docker`"
+    }
+}
