@@ -2,6 +2,10 @@ package nz.co.airnz.docker
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider
 import com.amazonaws.auth.BasicAWSCredentials
+import com.amazonaws.services.ec2.AmazonEC2
+import com.amazonaws.services.ec2.AmazonEC2ClientBuilder
+import com.amazonaws.services.ec2.model.DescribeSecurityGroupsRequest
+import com.amazonaws.services.ec2.model.SecurityGroup
 import com.amazonaws.services.ecs.AmazonECS
 import com.amazonaws.services.ecs.AmazonECSClientBuilder
 import com.amazonaws.services.ecs.model.*
@@ -11,12 +15,17 @@ class AWSClient(private val config: AWSConfiguration) {
     private val log = LoggerFactory.getLogger(this.javaClass)
     private val mapper = OurObjectMapper.INSTANCE
 
-    val ecsClient: AmazonECS
+    private val ecsClient: AmazonECS
+    private val ec2Client: AmazonEC2
 
     init {
         val awsCredentials = BasicAWSCredentials(config.key, config.secret)
         val awsCredentialsProvider = AWSStaticCredentialsProvider(awsCredentials)
         ecsClient = AmazonECSClientBuilder.standard()
+            .withCredentials(awsCredentialsProvider)
+            .withRegion(config.region)
+            .build()
+        ec2Client = AmazonEC2ClientBuilder.standard()
             .withCredentials(awsCredentialsProvider)
             .withRegion(config.region)
             .build()
@@ -61,7 +70,7 @@ class AWSClient(private val config: AWSConfiguration) {
                 .withNextToken(pageToken)
             val listResponse = ecsClient.listServices(listRequest)
             if (listResponse.serviceArns.isEmpty()) {
-                return listOf()
+                return acc
             }
 
             val describeRequest = DescribeServicesRequest()
@@ -88,4 +97,28 @@ class AWSClient(private val config: AWSConfiguration) {
         }
     }
 
+    fun fetchSecurityGroups(): List<SecurityGroup> {
+        fun fetch(pageToken: String?, acc: List<SecurityGroup>): List<SecurityGroup> {
+            val describeRequest = DescribeSecurityGroupsRequest()
+                .withMaxResults(1000)
+                .withNextToken(pageToken)
+            val describeResponse = ec2Client.describeSecurityGroups(describeRequest)
+            if (describeResponse.securityGroups.isEmpty()) {
+                return acc
+            }
+
+            return if (describeResponse.nextToken == null) {
+                acc.plus(describeResponse.securityGroups)
+            } else {
+                fetch(describeResponse.nextToken, acc.plus(describeResponse.securityGroups))
+            }
+        }
+
+        return try {
+            fetch(null, listOf())
+        } catch (e: Exception) {
+            log.error("Unexpected exception: {}", e.message)
+            listOf()
+        }
+    }
 }

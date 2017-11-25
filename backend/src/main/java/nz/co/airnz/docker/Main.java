@@ -42,6 +42,7 @@ public class Main extends Application<MainConfiguration> {
     clusters.forEach(cluster -> {
       System.out.println(awsClient.fetchECSServices(cluster));
     });
+    System.out.println(awsClient.fetchSecurityGroups());
 
     environment.healthChecks().register("status", new AppHealthCheck());
     environment.jersey().register(new ApiListingResource());
