@@ -12,3 +12,4 @@ logging:
 aws:
   key: AKIAI7WQTYQ22BDTOQ6A
   secret: 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
+  region: ap-southeast-2

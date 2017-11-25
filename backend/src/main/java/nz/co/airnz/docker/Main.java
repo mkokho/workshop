@@ -12,30 +12,29 @@ import nz.co.airnz.docker.health.AppHealthCheck;
 /**
  * Entry point to the app.
  */
-public class Main extends Application<MainConfiguration>
-{
-  public static void main(String[] args) throws Exception
-  {
+public class Main extends Application<MainConfiguration> {
+  public static void main(String[] args) throws Exception {
     new Main().run(args);
   }
 
   @Override
-  public void initialize(Bootstrap<MainConfiguration> bootstrap)
-  {
+  public void initialize(Bootstrap<MainConfiguration> bootstrap) {
     bootstrap.setConfigurationSourceProvider(
-            new SubstitutingSourceProvider(
-                    bootstrap.getConfigurationSourceProvider(),
-                    new EnvironmentVariableSubstitutor(true)
-            )
+      new SubstitutingSourceProvider(
+        bootstrap.getConfigurationSourceProvider(),
+        new EnvironmentVariableSubstitutor(true)
+      )
     );
     bootstrap.setObjectMapper(OurObjectMapper.INSTANCE);
   }
 
   @Override
-  public void run(MainConfiguration config, Environment environment) throws Exception
-  {
-    environment.healthChecks().register("status", new AppHealthCheck());
+  public void run(MainConfiguration config, Environment environment) throws Exception {
+    AWSClient awsClient = new AWSClient(config.getAws());
 
+    System.out.println(OurObjectMapper.INSTANCE.writeValueAsString(awsClient.fetchECSClusters()));
+
+    environment.healthChecks().register("status", new AppHealthCheck());
     environment.jersey().register(new ApiListingResource());
     environment.jersey().register(new DashboardResource());
 

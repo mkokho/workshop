@@ -8,5 +8,6 @@ class MainConfiguration(
 
 data class AWSConfiguration(
     val key: String,
-    val secret: String
+    val secret: String,
+    val region: String
 )
