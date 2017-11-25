@@ -4,9 +4,7 @@ import com.amazonaws.auth.AWSStaticCredentialsProvider
 import com.amazonaws.auth.BasicAWSCredentials
 import com.amazonaws.services.ecs.AmazonECS
 import com.amazonaws.services.ecs.AmazonECSClientBuilder
-import com.amazonaws.services.ecs.model.Cluster
-import com.amazonaws.services.ecs.model.DescribeClustersRequest
-import com.amazonaws.services.ecs.model.ListClustersRequest
+import com.amazonaws.services.ecs.model.*
 import org.slf4j.LoggerFactory
 
 class AWSClient(private val config: AWSConfiguration) {
@@ -53,4 +51,41 @@ class AWSClient(private val config: AWSConfiguration) {
             listOf()
         }
     }
+
+
+    fun fetchECSServices(cluster: Cluster): List<Service> {
+        fun fetch(pageToken: String?, acc: List<Service>): List<Service> {
+            val listRequest = ListServicesRequest()
+                .withCluster(cluster.clusterArn)
+                .withMaxResults(10)
+                .withNextToken(pageToken)
+            val listResponse = ecsClient.listServices(listRequest)
+            if (listResponse.serviceArns.isEmpty()) {
+                return listOf()
+            }
+
+            val describeRequest = DescribeServicesRequest()
+                .withCluster(cluster.clusterArn)
+                .withServices(listResponse.serviceArns)
+            val describeResponse = ecsClient.describeServices(describeRequest)
+
+            return if (describeResponse.failures.isEmpty()) {
+                if (listResponse.nextToken == null) {
+                    acc.plus(describeResponse.services)
+                } else {
+                    fetch(listResponse.nextToken, acc.plus(describeResponse.services))
+                }
+            } else {
+                throw RuntimeException("Failed to describe services: " + describeResponse.failures)
+            }
+        }
+
+        return try {
+            fetch(null, listOf())
+        } catch (e: Exception) {
+            log.error("Unexpected exception: {}", e.message)
+            listOf()
+        }
+    }
+
 }
