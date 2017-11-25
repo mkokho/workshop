@@ -1,7 +1,6 @@
 package nz.co.airnz.docker;
 
 import io.dropwizard.Application;
-import io.dropwizard.Configuration;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.setup.Bootstrap;
@@ -13,7 +12,7 @@ import nz.co.airnz.docker.health.AppHealthCheck;
 /**
  * Entry point to the app.
  */
-public class Main extends Application<Configuration>
+public class Main extends Application<MainConfiguration>
 {
   public static void main(String[] args) throws Exception
   {
@@ -21,7 +20,7 @@ public class Main extends Application<Configuration>
   }
 
   @Override
-  public void initialize(Bootstrap<Configuration> bootstrap)
+  public void initialize(Bootstrap<MainConfiguration> bootstrap)
   {
     bootstrap.setConfigurationSourceProvider(
             new SubstitutingSourceProvider(
@@ -33,7 +32,7 @@ public class Main extends Application<Configuration>
   }
 
   @Override
-  public void run(Configuration configuration, Environment environment) throws Exception
+  public void run(MainConfiguration config, Environment environment) throws Exception
   {
     environment.healthChecks().register("status", new AppHealthCheck());
 
