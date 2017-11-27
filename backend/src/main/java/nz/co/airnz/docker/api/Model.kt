@@ -1,5 +1,9 @@
 package nz.co.airnz.docker.api
 
-data class Cluster(
-    val name: String
+import com.amazonaws.services.ecs.model.Cluster
+import com.amazonaws.services.ecs.model.Service
+
+data class DashboardData(
+    val clusters: List<Cluster>,
+    val services: List<Service>
 )
