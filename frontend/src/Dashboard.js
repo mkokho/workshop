@@ -1,6 +1,38 @@
 import React, {Component} from "react";
 import "./Dashboard.css";
 import axios from "axios";
+import ReactTable from "react-table";
+import "react-table/react-table.css";
+
+const data = [{
+  account: 'ADMkokhom',
+  age: 26,
+  friend: {
+    name: 'Jason Maurer',
+    age: 23,
+  }
+}];
+
+const columns = [
+  {
+    Header: 'Name',
+    accessor: 'name'
+  },
+  {
+    Header: 'Account',
+    accessor: 'account'
+  },
+  {
+    Header: "ECS Cluster",
+    columns: [
+      {
+        Header: "x",
+        accessor: d => d.cluster.exists
+      }
+    ]
+  }
+];
+
 
 class Dashboard extends Component {
   constructor(props) {
@@ -41,9 +73,31 @@ class Dashboard extends Component {
       });
   }
 
+  dataForAccount(account) {
+    return {
+      name: "Name " + account,
+      account: account,
+      cluster: {
+        exists: false
+      },
+      hasService: false
+    }
+  }
+
   render() {
+    var data = [
+      this.dataForAccount("ADMkokhom"),
+      this.dataForAccount("ADMjohns"),
+    ];
     return (
       <div>
+        <ReactTable
+          showPagination={false}
+          showPageSizeOptions={false}
+          defaultPageSize={5}
+          data={data}
+          columns={columns}
+        />
         <div>
           {this.state.date.toLocaleTimeString()}
         </div>
@@ -65,7 +119,8 @@ class Dashboard extends Component {
           </tbody>
         </table>
       </div>
-    );
+    )
+      ;
   }
 }
 
