@@ -6,8 +6,10 @@
     "axios": "^0.17.1",
     "react": "^16.1.1",
     "react-dom": "^16.1.1",
+    "react-octicon": "^3.0.1",
     "react-scripts": "1.0.17",
-    "react-table": "^6.7.4"
+    "react-table": "^6.7.4",
+    "react-tooltip": "^3.4.0"
   },
   "scripts": {
     "start": "react-scripts start",

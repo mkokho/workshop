@@ -1,3 +1,16 @@
 .Dashboard {
   text-align: left;
 }
+
+.octicon {
+  margin-left: 2px;
+  margin-right: 2px;
+}
+
+.octicon-check {
+  color: green
+}
+
+.octicon-primitive-dot {
+  color: #ffbb00
+}

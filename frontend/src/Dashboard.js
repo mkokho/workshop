@@ -3,15 +3,10 @@ import "./Dashboard.css";
 import axios from "axios";
 import ReactTable from "react-table";
 import "react-table/react-table.css";
+import ReactTooltip from 'react-tooltip'
+import Octicon from 'react-octicon'
 
-const data = [{
-  account: 'ADMkokhom',
-  age: 26,
-  friend: {
-    name: 'Jason Maurer',
-    age: 23,
-  }
-}];
+
 
 const columns = [
   {
@@ -24,12 +19,18 @@ const columns = [
   },
   {
     Header: "ECS Cluster",
-    columns: [
-      {
-        Header: "x",
-        accessor: d => d.cluster.exists
-      }
-    ]
+    accessor: 'ecsCluster',
+    width: 100,
+    Cell: function(row){
+      return <div>
+          <Octicon name="check" data-tip="task 1"/>
+          <Octicon name="primitive-dot" data-tip="task 2"/>
+        </div>;
+    }
+  },
+  {
+    Header: 'Account',
+    accessor: 'account'
   }
 ];
 
@@ -77,6 +78,7 @@ class Dashboard extends Component {
     return {
       name: "Name " + account,
       account: account,
+      ecsCluster: 1,
       cluster: {
         exists: false
       },
@@ -91,33 +93,15 @@ class Dashboard extends Component {
     ];
     return (
       <div>
+        <ReactTooltip delayShow={500}/>
         <ReactTable
           showPagination={false}
           showPageSizeOptions={false}
           defaultPageSize={5}
           data={data}
           columns={columns}
+          className={"-highlight"}
         />
-        <div>
-          {this.state.date.toLocaleTimeString()}
-        </div>
-        <div>
-          {JSON.stringify(this.state.data)}
-        </div>
-        <table className="Dashboard">
-          <tbody>
-          <tr>
-            <td>
-              ADMkokhom
-            </td>
-          </tr>
-          <tr>
-            <td>
-              ADMsomeone
-            </td>
-          </tr>
-          </tbody>
-        </table>
       </div>
     )
       ;
